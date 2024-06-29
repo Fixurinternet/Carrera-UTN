@@ -63,24 +63,24 @@ def mostrar_pregunta_y_opciones(pantalla, pregunta, x, y, ancho, alto, color, fu
         color (tuple): Color del area de la pregunta.
         fuente (pygame.font.Font): Fuente del texto.
     """
-    # Dibujar rectángulo
+
     rectangulo = pygame.Rect(281, 10, 365, alto)
     pygame.draw.rect(pantalla, GREEN3, rectangulo)
 
-    # Ajustar el texto de la pregunta dentro del rectángulo
+    
     lineas_pregunta = ajustar_texto(pregunta['pregunta'], fuente, ancho - 20)
     y_texto = y - 180
     for linea in lineas_pregunta:
         mostrar_texto(pantalla, linea, x + 40, y_texto, (0, 0, 0), fuente)
         y_texto += fuente.get_height() + 5
 
-    # Coordenadas para las opciones
+    
     opciones = ['a', 'b', 'c']
-    x_opcion = x + 35  # Espacio entre la pregunta y las opciones
+    x_opcion = x + 35  
     for opcion in opciones:
-        # Mostrar solo el texto de la opción sin la etiqueta
+        
         mostrar_texto(pantalla, f"{pregunta[opcion]}", x_opcion, y - 35, (0, 0, 0), fuente)
-        x_opcion += 150  # Espacio entre opciones
+        x_opcion += 150  
 
 def ajustar_texto(texto, fuente, ancho_maximo):
     """Ajusta el texto para que se ajuste dentro de un ancho maximo.
@@ -122,7 +122,7 @@ def mostrar_tablero(pantalla, posiciones_casillas, colores_casillas, LLEGADA, ca
         color = colores_casillas[i]
         pygame.draw.rect(pantalla, color, (x, y, 70, 55), border_radius=10)
         if i == LLEGADA:
-            mostrar_texto(pantalla, "Llegada", x + 5, y + 10, BLACK, fuente)  # Ajusta las coordenadas según sea necesario
+            mostrar_texto(pantalla, "Llegada", x + 5, y + 10, BLACK, fuente)  
         if i in casillas_especiales:
             mostrar_texto(pantalla, casillas_especiales[i], x - 1, y + 10, (0, 0, 0), pygame.font.Font(None, 18))
 
@@ -186,20 +186,20 @@ def mostrar_puntajes(pantalla, fuente):
         pantalla (pygame.Surface): Superficie en la que se mostraran los puntajes.
         fuente (pygame.font.Font): Fuente del texto.
     """
-    personaje = pygame.image.load('personaje.png')  # Agrega la ruta correcta si es diferente
+    personaje = pygame.image.load('personaje.png')  
 
     pantalla.fill((30, 144, 255))  # Fondo azul
 
-    # Blitear imágenes de carrera_utn y personaje en posiciones específicas
-    pantalla.blit(personaje, (207, 267))  # Ajusta las coordenadas según la posición deseada
+    
+    pantalla.blit(personaje, (207, 267))  
     mostrar_imagen(pantalla, "carrera_utn.png", 25, 11, 250, 200)
 
-    # Título "Mejores Puntajes"
+    
     titulo = fuente.render("Mejores Puntajes", True, (255, 255, 255))
     rect_titulo = titulo.get_rect(center=(ANCHO_VENTANA // 2, 50))
     pantalla.blit(titulo, rect_titulo)
 
-    # Mostrar los puntajes
+    
     try:
         with open('puntajes.json', 'r') as archivo:
             puntajes = json.load(archivo)
@@ -212,8 +212,8 @@ def mostrar_puntajes(pantalla, fuente):
         mostrar_texto(pantalla, texto_puntaje, 300, y_pos, (255, 255, 255), fuente)
         y_pos += 30
 
-    # Botón para salir del programa
-    boton_salir = pygame.Rect(644, 495, 100, 50)  # Ajusta las coordenadas y tamaño según tu diseño
+    
+    boton_salir = pygame.Rect(644, 495, 100, 50)  
     pygame.draw.rect(pantalla, (173, 216, 230), boton_salir, border_radius=10)
     texto_salir = fuente.render("Salir", True, (0, 0, 0))
     rect_texto_salir = texto_salir.get_rect(center=boton_salir.center)
@@ -221,7 +221,7 @@ def mostrar_puntajes(pantalla, fuente):
 
     pygame.display.flip()
 
-    # Esperar a que el usuario haga clic en Salir
+    
     mostrando_puntajes = True
     while mostrando_puntajes:
         for event in pygame.event.get():
@@ -233,7 +233,7 @@ def mostrar_puntajes(pantalla, fuente):
                 if boton_salir.collidepoint(x, y):
                     mostrando_puntajes = False
 
-    # Una vez que el bucle termina, volvemos al estado anterior sin cerrar Pygame
+    
 
 
 def mostrar_interfaz(pantalla, tiempo_restante, puntaje, casillas, fuente, posiciones_casillas, colores_casillas, LLEGADA, casillas_especiales, personaje_imagen):
@@ -323,7 +323,7 @@ def avanzar_pregunta(pregunta_actual, lista):
     """
     pregunta_actual += 1
     if pregunta_actual >= len(lista):
-        pregunta_actual = 0  # Volver al inicio de la lista de preguntas
+        pregunta_actual = 0  
     return pregunta_actual, *reiniciar_tiempo()
 
 
@@ -349,27 +349,27 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
     corriendo = True
     tiempo_inicio, tiempo_ultima_accion = reiniciar_tiempo()
 
-    # Definir imagen del personaje
-    personaje_imagen = pygame.Rect(72, 223, 40, 100)  # Ajustar tamaño de imagen si es necesario
+    
+    personaje_imagen = pygame.Rect(72, 223, 40, 100)  
 
     while corriendo:
         boton_comenzar, boton_terminar = mostrar_interfaz(pantalla, tiempo_restante, puntaje, casillas, fuente, posiciones_casillas, colores_casillas, LLEGADA, casillas_especiales, personaje_imagen)
         tiempo_actual = time.time()
         
         if juego_iniciado:
-            # Mostrar tiempo restante
+            
             tiempo_transcurrido = int(tiempo_actual - tiempo_inicio)
             tiempo_restante = 5 - tiempo_transcurrido
             
             if tiempo_restante <= 0:
                 tiempo_restante = 0
 
-            # Mostrar pregunta y opciones
+            
             if pregunta_actual < len(lista):
                 pregunta = lista[pregunta_actual]
                 mostrar_pregunta_y_opciones(pantalla, pregunta, 250, 200, 300, 200, (34, 139, 34), fuente_pregunta)
             
-            # Verificar si se llegó a la casilla de llegada
+            
             if casillas >= LLEGADA:
                 juego_iniciado = False
                 nombre_jugador = pedir_nombre(pantalla, fuente)
@@ -377,7 +377,7 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
                 mostrar_puntajes(pantalla, fuente)
                 corriendo = False
 
-            # Mover personaje
+            
             mover_personaje(casillas, posiciones_casillas, personaje_imagen)
 
         for event in pygame.event.get():
@@ -423,7 +423,7 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
                                 casillas = max(0, casillas - 1)
                                 pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, lista)
 
-        # Verificar tiempo de inactividad
+        
         tiempo_inactivo = int(tiempo_actual - tiempo_ultima_accion)
         if tiempo_inactivo >= 5 and juego_iniciado:
             pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, lista)
