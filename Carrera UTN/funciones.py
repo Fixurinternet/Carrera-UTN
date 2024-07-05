@@ -327,6 +327,46 @@ def avanzar_pregunta(pregunta_actual, lista):
     return pregunta_actual, *reiniciar_tiempo()
 
 
+def crear_sublistas(preguntas):
+    """
+    Crea sub-listas a partir de una lista de preguntas.
+
+    Args:
+        preguntas (list): Una lista de diccionarios donde cada diccionario
+                          representa una pregunta con sus opciones, tema y
+                          respuesta correcta. Cada diccionario debe tener las
+                          siguientes claves:
+                          - "pregunta": El texto de la pregunta (str).
+                          - "a": Texto de la opción a (str).
+                          - "b": Texto de la opción b (str).
+                          - "c": Texto de la opción c (str).
+                          - "correcta": La clave de la opción correcta (str).
+                          - "tema": El tema de la pregunta (str).
+
+    Returns:
+        list: Una lista de sub-listas donde cada sub-lista contiene los
+              elementos de una pregunta en el siguiente orden:
+              - Texto de la pregunta.
+              - Texto de la opción a.
+              - Texto de la opción b.
+              - Texto de la opción c.
+              - Tema de la pregunta.
+              - Clave de la opción correcta.
+    """
+    sublistas = []
+    for pregunta in preguntas:
+        sublista = [
+            pregunta["pregunta"],
+            pregunta["a"],
+            pregunta["b"],
+            pregunta["c"],
+            pregunta["tema"],
+            pregunta["correcta"]
+        ]
+        sublistas.append(sublista)
+    return sublistas
+
+
 def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas, colores_casillas, casillas_especiales):
     """Ejecuta el bucle principal del juego.
 
@@ -340,6 +380,7 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
         colores_casillas: Lista de colores de las casillas en el tablero.
         casillas_especiales: Diccionario de casillas especiales con acciones.
     """
+    sublistas_preguntas = crear_sublistas(lista)
     casillas = 0
     puntaje = 0
     pregunta_actual = 0
@@ -349,27 +390,33 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
     corriendo = True
     tiempo_inicio, tiempo_ultima_accion = reiniciar_tiempo()
 
-    
-    personaje_imagen = pygame.Rect(72, 223, 40, 100)  
+    # Definir imagen del personaje
+    personaje_imagen = pygame.Rect(72, 223, 40, 100)  # Ajustar tamaño de imagen si es necesario
 
     while corriendo:
         boton_comenzar, boton_terminar = mostrar_interfaz(pantalla, tiempo_restante, puntaje, casillas, fuente, posiciones_casillas, colores_casillas, LLEGADA, casillas_especiales, personaje_imagen)
         tiempo_actual = time.time()
         
         if juego_iniciado:
-            
+            # Mostrar tiempo restante
             tiempo_transcurrido = int(tiempo_actual - tiempo_inicio)
             tiempo_restante = 5 - tiempo_transcurrido
             
             if tiempo_restante <= 0:
                 tiempo_restante = 0
 
+            # Mostrar pregunta y opciones
+            if pregunta_actual < len(sublistas_preguntas):
+                pregunta = sublistas_preguntas[pregunta_actual]
+                mostrar_pregunta_y_opciones(pantalla, {
+                    "pregunta": pregunta[0],
+                    "a": pregunta[1],
+                    "b": pregunta[2],
+                    "c": pregunta[3],
+                    "correcta": pregunta[5]
+                }, 250, 200, 300, 200, (34, 139, 34), fuente_pregunta)
             
-            if pregunta_actual < len(lista):
-                pregunta = lista[pregunta_actual]
-                mostrar_pregunta_y_opciones(pantalla, pregunta, 250, 200, 300, 200, (34, 139, 34), fuente_pregunta)
-            
-            
+            # Verificar si se llegó a la casilla de llegada
             if casillas >= LLEGADA:
                 juego_iniciado = False
                 nombre_jugador = pedir_nombre(pantalla, fuente)
@@ -377,13 +424,14 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
                 mostrar_puntajes(pantalla, fuente)
                 corriendo = False
 
-            
+            # Mover personaje
             mover_personaje(casillas, posiciones_casillas, personaje_imagen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 corriendo = False
                 pygame.quit()
+                return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 print(f"Coordenadas del clic: ({x}, {y})")
@@ -408,9 +456,9 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
                         else:
                             respuesta = None
 
-                        if respuesta and pregunta_actual < len(lista):
-                            pregunta = lista[pregunta_actual]
-                            if respuesta == pregunta['correcta']:
+                        if respuesta and pregunta_actual < len(sublistas_preguntas):
+                            pregunta = sublistas_preguntas[pregunta_actual]
+                            if respuesta == pregunta[5]:
                                 casillas += 2
                                 puntaje += 10
                                 if casillas in casillas_especiales:
@@ -418,15 +466,15 @@ def juego(pantalla, fuente, fuente_pregunta, lista, LLEGADA, posiciones_casillas
                                         casillas += 1
                                     elif casillas_especiales[casillas] == "Retrocede 1":
                                         casillas -= 1
-                                pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, lista)
+                                pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, sublistas_preguntas)
                             else:
                                 casillas = max(0, casillas - 1)
-                                pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, lista)
+                                pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, sublistas_preguntas)
 
         
         tiempo_inactivo = int(tiempo_actual - tiempo_ultima_accion)
         if tiempo_inactivo >= 5 and juego_iniciado:
-            pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, lista)
+            pregunta_actual, tiempo_inicio, tiempo_ultima_accion = avanzar_pregunta(pregunta_actual, sublistas_preguntas)
         
         pygame.display.flip()
 
